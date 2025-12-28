@@ -71,14 +71,14 @@ class AudioUtil():
     def pitch_shift(aud, shift_limit=[-4, 4]):
         sig, sr = aud
         pitch_shift = np.random.randint(shift_limit[0], shift_limit[1] + 1)
-        sig_new = librosa.effects.pitch_shift(sig.numpy(), sr=sr, n_steps=pitch_shift)
+        sig_new = librosa.effects.pitch_shift(y=sig.numpy(), sr=sr, n_steps=pitch_shift)
         return (torch.Tensor(sig_new), sr)
 
     @staticmethod
     def time_stretch(aud, shift_limit=[0.9, 1.2]):
         sig, sr = aud
         stretch_time = random.uniform(shift_limit[0], shift_limit[1])
-        sig_new = librosa.effects.time_stretch(sig.numpy(), rate=stretch_time)
+        sig_new = librosa.effects.time_stretch(y=sig.numpy(), rate=stretch_time)
         return (torch.Tensor(sig_new), sr)
 
     @staticmethod
@@ -120,7 +120,7 @@ class AudioUtil():
     @staticmethod
     def get_spec(aud):
         sig, sr = aud
-        spectral_centroids = librosa.feature.spectral_centroid(sig.numpy(), sr=4000, n_fft=200, hop_length=100)[0]
+        spectral_centroids = librosa.feature.spectral_centroid(y=sig.numpy(), sr=4000, n_fft=200, hop_length=100)[0]
         spec_bw = librosa.feature.spectral_bandwidth(y=sig.numpy(), sr=4000, n_fft=200, hop_length=100)
         return np.mean(spectral_centroids) / 2000, np.std(spectral_centroids)/2000, np.mean(spec_bw)/2000, np.std(spec_bw)/2000
 
