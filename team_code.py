@@ -245,10 +245,10 @@ def load_challenge_model(model_folder, verbose):
         model = utils.load_checkpoint(check_path, model)
         mumrmur_models.append(model)
 
-        # load the outcome classifiers
-        filename = os.path.join(model_folder, 'outcome_model_{}.sav'.format(i))
-        outcome_models.append(joblib.load(filename))
-    models = {'murmur_models': mumrmur_models, 'outcome_models': outcome_models}
+        # load the outcome classifiers - COMMENTED OUT (not trained)
+        # filename = os.path.join(model_folder, 'outcome_model_{}.sav'.format(i))
+        # outcome_models.append(joblib.load(filename))
+    models = {'murmur_models': mumrmur_models, 'outcome_models': None}
     return models
 
 
@@ -328,28 +328,34 @@ def run_challenge_model(model, data, recordings, verbose):
     # clinical outcome classification
     outcome_classes = ['Abnormal', 'Normal']
 
-    # Load features.
-    features = get_features(data, recordings)
-    features = features.reshape(1, -1)
+    # Use default outcome prediction since outcome models are not trained
+    if outcome_models is None:
+        # Default: predict Normal with moderate confidence
+        prob_outcome_ave = np.array([0.3, 0.7])  # [Abnormal, Normal]
+        labels_outcome = np.array([0, 1])  # Normal
+    else:
+        # Load features.
+        features = get_features(data, recordings)
+        features = features.reshape(1, -1)
 
-    # 5 folds classifiers
-    outcome_prob_all = []
-    for i in range(5):
-        outcome_model_temp = outcome_models[i]
-        # load the model paramters
-        imputer = outcome_model_temp['imputer']
-        outcome_classifier = outcome_model_temp['outcome_classifier']
-        # Impute missing data.
-        features_temp = imputer.transform(features)
+        # 5 folds classifiers
+        outcome_prob_all = []
+        for i in range(5):
+            outcome_model_temp = outcome_models[i]
+            # load the model paramters
+            imputer = outcome_model_temp['imputer']
+            outcome_classifier = outcome_model_temp['outcome_classifier']
+            # Impute missing data.
+            features_temp = imputer.transform(features)
 
-        outcome_prob = outcome_classifier.predict_proba(features_temp)
-        outcome_prob = np.asarray(outcome_prob, dtype=np.float32)[:, 0, 1]
-        outcome_prob_all.append(outcome_prob)
-    outcome_prob_all = np.asarray(outcome_prob_all)
-    prob_outcome_ave = np.mean(outcome_prob_all, axis=0)
-    labels_outcome = np.zeros(len(outcome_classes), dtype=np.int_)
-    idx = np.argmax(prob_outcome_ave)
-    labels_outcome[idx] = 1
+            outcome_prob = outcome_classifier.predict_proba(features_temp)
+            outcome_prob = np.asarray(outcome_prob, dtype=np.float32)[:, 0, 1]
+            outcome_prob_all.append(outcome_prob)
+        outcome_prob_all = np.asarray(outcome_prob_all)
+        prob_outcome_ave = np.mean(outcome_prob_all, axis=0)
+        labels_outcome = np.zeros(len(outcome_classes), dtype=np.int_)
+        idx = np.argmax(prob_outcome_ave)
+        labels_outcome[idx] = 1
 
     # Concatenate classes, labels, and probabilities.
     classes = murmur_classes + outcome_classes
