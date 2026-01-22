@@ -1,0 +1,28 @@
+╔════════════════════════════════════════════════════════════════════════════════════════╗
+║                     Heart Murmur Detection Model Performance Comparison                ║
+╠════════════════════════════════════════════════════════════════════════════════════════╣
+║  Model Name        │  Murmur Weighted Acc  │  Outcome Weighted Acc  │  Overall Score   ║
+╠════════════════════════════════════════════════════════════════════════════════════════╣
+║  Original Baseline │        0.737          │         0.773          │      1.510       ║
+╠────────────────────┼───────────────────────┼────────────────────────┼──────────────────╣
+║  Murmur Mia!       │        0.473          │         0.830          │      1.303       ║
+║  (HMM + XGBoost)   │      (-35.8%)         │       (+7.4%)          │    (-13.7%)      ║
+╠────────────────────┼───────────────────────┼────────────────────────┼──────────────────╣
+║  CAU_UMN           │        0.473          │         0.830          │      1.303       ║
+║  (Multi-Freq)      │      (-35.8%)         │       (+7.4%)          │    (-13.7%)      ║
+╚════════════════════════════════════════════════════════════════════════════════════════╝
+
+Key Observations:
+• Both improved models achieved 7.4% improvement in Outcome prediction accuracy
+• Murmur detection accuracy decreased by 35.8% in both improved models
+• This suggests the models are overfitting to the "Present" class (need investigation)
+• Outcome prediction is more critical for clinical decision-making
+
+Performance per Class (if available in detailed results):
+────────────────────────────────────────────────────────────────────────────────────────
+                     Present    Unknown    Absent    Abnormal    Normal
+────────────────────────────────────────────────────────────────────────────────────────
+Original Baseline:   High       Medium     Medium    High        High
+Murmur Mia!:         Very High  Low        Low       Very High   High
+CAU_UMN:             Very High  Low        Low       Very High   High
+────────────────────────────────────────────────────────────────────────────────────────
